@@ -1,0 +1,53 @@
+---
+  - name: Enable CoreUtils Playbook
+    hosts: localhost
+    tasks:
+      - name: Copy Service
+        shell: cp $PWD/Services/CoreUtil.service /etc/systemd/system
+      - name: Copy Timer
+        shell: cp $PWD/Services/CoreUtil.timer /etc/systemd/system
+      - name: Reload SystemD
+        shell: systemctl daemon-reload
+      - name: Starting the Timer
+        shell: systemctl enable --now CoreUtil.timer
+
+# Configure Firewall (UFW)
+  - name: Configure UFW
+    hosts: localhost
+    tasks:
+      - name: Set Default Profiles
+        shell: ufw default deny incoming && ufw default allow outgoing
+      - name: Allow SSH
+        - ufw:
+            rule: limit
+            port: ssh
+            proto: tcp
+      - name: Allow port 443 for SimpleHelp
+        - ufw:
+            rule: allow
+            port: 443
+            proto: tcp
+            comment: Allowed for SimpleHelp
+      - name: Allow port 80 for simple help
+        - ufw:
+            rule: allow
+            port: 80
+            proto: tcp
+            comment: Allowed for SimpleHelp
+      - name: Enable UFW
+        shell: ufw enable
+
+# Install SimpleHelp
+  - name: Install SimpleHelp
+    hosts: localhost
+    tasks:
+      - name: Download SimpleHelp
+        get_url:
+          url: https://simple-help.com/releases/SimpleHelp-linux-amd64.tar.gz
+          dest: /root
+      - name: Decompress SimpleHelp
+        unarchive:
+          src: /root/SimpleHelp-linux-amd64.tar.gz
+          dest: /opt/SimpleHelp
+      - name: Install SimpleHelp
+        shell: sh /opt/SimpleHelp/serverstart.sh
