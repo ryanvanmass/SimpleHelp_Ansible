@@ -52,6 +52,6 @@
       - name: Decompress SimpleHelp
         unarchive:
           src: /root/SimpleHelp-linux-amd64.tar.gz
-          dest: /opt/SimpleHelp
+          dest: /opt/SimpleHelp/
       - name: Install SimpleHelp
         shell: sh /opt/SimpleHelp/serverstart.sh
